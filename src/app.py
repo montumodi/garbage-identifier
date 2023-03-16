@@ -3,7 +3,7 @@ import io
 import json
 
 import dash
-from dash import Dash, dash_table
+from dash import dash_table
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
@@ -41,7 +41,6 @@ app.layout = html.Div([
     html.Div(id='output-image-upload'),
 ])
 
-# A function that returns the 'year' value:
 def myFunc(e):
   return e["probability"]
 
