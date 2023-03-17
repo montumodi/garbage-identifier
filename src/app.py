@@ -11,6 +11,7 @@ import base64
 
 from PIL import Image
 from predict import initialize, predict_image
+from amazon import show_custom_labels
 
 initialize()
 
@@ -61,8 +62,11 @@ def parse_contents(contents, filename, date, y):
               State('upload-image', 'last_modified'))
 def update_output(list_of_contents, list_of_names, list_of_dates):
     if list_of_contents is not None:
-        img = Image.open(io.BytesIO(base64.b64decode(list_of_contents[0].split(",")[1])))
+        base64Image = base64.b64decode(list_of_contents[0].split(",")[1]);
+        img = Image.open(io.BytesIO(base64Image))
         Y = predict_image(img)
+        X = show_custom_labels(base64Image)
+        print(X)
         children = parse_contents(list_of_contents[0], list_of_names[0], list_of_dates[0], Y)
         return children
 
