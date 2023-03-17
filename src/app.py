@@ -65,8 +65,8 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         base64Image = base64.b64decode(list_of_contents[0].split(",")[1]);
         img = Image.open(io.BytesIO(base64Image))
         Y = predict_image(img)
-        X = show_custom_labels(base64Image)
-        print(X)
+        #X = show_custom_labels(base64Image)
+        #print(X)
         children = parse_contents(list_of_contents[0], list_of_names[0], list_of_dates[0], Y)
         return children
 
