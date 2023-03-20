@@ -1,7 +1,12 @@
 # garbage-identifier
 
-## Build
+## Build & How to run
 
 ```bash
-docker build -t <your image name> .
+docker build -t custom-vision .
+
+docker run -it -v "/workspaces/garbage-identifier/:/vs/" -p 8080:8080 -e PORT=8080 custom-vision bash
+
+gunicorn --bind :8080 --chdir src/ app:server
+
 ```
