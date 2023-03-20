@@ -11,7 +11,7 @@ import base64
 
 from PIL import Image
 from predict import initialize, predict_image
-from amazon import show_custom_labels
+# from amazon import show_custom_labels
 from camera import open_camera, opencamera
 
 initialize()
