@@ -12,6 +12,7 @@ import base64
 from PIL import Image
 from predict import initialize, predict_image
 from amazon import show_custom_labels
+from camera import open_camera, opencamera
 
 initialize()
 
@@ -39,7 +40,9 @@ app.layout = html.Div([
         # Allow multiple files to be uploaded
         multiple=True
     ),
+    html.Button('Open Camera', id='open_camera', n_clicks=0),
     html.Div(id='output-image-upload'),
+    html.Div(id='output-image-upload-camera', children='Enter a value and press submit')
 ])
 
 def myFunc(e):
@@ -69,6 +72,17 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         #print(X)
         children = parse_contents(list_of_contents[0], list_of_names[0], list_of_dates[0], Y)
         return children
+
+
+@app.callback(Output('output-image-upload-camera', 'children'),
+              Input('open_camera', 'n_clicks'))
+def start_camera(n_clicks):
+    print("\n", "*"*8, "Camera opening", "*"*8, "\n")
+    opencamera()
+    #X = show_custom_labels(base64Image)
+    #print(X)
+    return html.Div(children='Incorrect Password',style={'padding-left':'550px','padding-top':'40px','font-size':'16px'})
+
 
 if __name__ == '__main__':
     app.run_server(debug=True,port=8080)

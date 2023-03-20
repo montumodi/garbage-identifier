@@ -7,6 +7,8 @@ WORKDIR $APP_HOME
 RUN pip install -U pip
 RUN pip install --no-cache-dir gunicorn dash numpy~=1.17.5 tensorflow~=2.0.2 flask~=2.1.2 pillow~=7.2.0 protobuf~=3.20.0 boto3
 RUN pip install --no-cache-dir mscviplib==2.200731.16
+RUN pip install opencv-python
+RUN apt-get update && apt-get install libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 -y
 
 ENV PYTHONUNBUFFERED True
 
