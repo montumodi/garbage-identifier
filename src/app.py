@@ -21,6 +21,7 @@ server = app.server
 app.layout = html.Div([
     html.Video(id="videoElement",autoPlay=True,height=500,width=500),
     html.Canvas(id="screenshot-canvas"),
+    html.Img(id="contentsCamera",height=500,width=500),
     dcc.Input(
             id="secretId",type="text",value=''
         ),
@@ -63,12 +64,18 @@ def parse_contents(contents, filename, date, y):
 
 @app.callback(
     Output("container", "children"),
-    Input("secretId", "value")
+    Input("contentsCamera", "src")
 )
-def update_output(input1):
-    print("inside the function")
-    print(input1)
-    return input1
+def update_output(input):
+    print("inside the function");
+    print(input)
+    if input is not None:
+        base64Image = base64.b64decode(input.split(",")[1]);
+        img = Image.open(io.BytesIO(base64Image))
+        Y = predict_image(base64Image)
+        children = parse_contents(base64Image, "", "", Y)
+        print(children)
+        return children
 
 @app.callback(Output('output-image-upload', 'children'),
               Input('upload-image', 'contents'),

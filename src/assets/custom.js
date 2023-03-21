@@ -11,10 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     console.log("herere");
                     video.srcObject = stream;
 
-                    // await delay(1000);
+                    await delay(1000);
 
                     const canvas = document.querySelector('#screenshot-canvas'); // select the video element
-                    const secretInput = document.querySelector('#secretId'); // select the video element
+                    const contentsCamera = document.querySelector('#contentsCamera'); // select the video element
+                    const secretId = document.querySelector('#secretId'); // select the video element
 
                     // const canvas = document.createElement('canvas'); // create a canvas element
                     const ctx = canvas.getContext('2d'); // get the context of the canvas element
@@ -30,7 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         // convert the canvas data to an image data URL
                         const imageDataUrl = canvas.toDataURL('image/png');
                         // do something with the image data URL, such as display it on the page or send it to a server
-                        secretInput.value = imageDataUrl;
+                        contentsCamera.src = imageDataUrl;
+                        secretId.value = imageDataUrl;
                         // schedule the next frame capture
                         requestAnimationFrame(capture);
                     }
