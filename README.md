@@ -3,9 +3,7 @@
 ## Build & How to run
 
 ```bash
-docker build -t custom-vision .
-
-docker run -it -v "/workspaces/garbage-identifier/:/vs/" -p 8080:8080 -e PORT=8080 custom-vision bash
+docker build -t custom-vision . && docker run -it -v "/workspaces/garbage-identifier/:/vs/" -p 8080:8080 -e PORT=8080 custom-vision bash
 
 cd /vs
 
