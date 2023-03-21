@@ -19,6 +19,11 @@ app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
+    html.Video(id="videoElement",autoPlay=True,height=500,width=500),
+    html.Canvas(id="screenshot-canvas"),
+    dcc.Input(
+            id="secretId",type="text",value=''
+        ),
     dcc.Upload(
         id='upload-image',
         children=html.Div([
@@ -39,6 +44,7 @@ app.layout = html.Div([
         multiple=True
     ),
     html.Div(id='output-image-upload'),
+    html.Div(id="container")
 ])
 
 def myFunc(e):
@@ -54,6 +60,15 @@ def parse_contents(contents, filename, date, y):
         html.Hr(),
         dash_table.DataTable(myList)
     ])
+
+@app.callback(
+    Output("container", "children"),
+    Input("secretId", "value")
+)
+def update_output(input1):
+    print("inside the function")
+    print(input1)
+    return input1
 
 @app.callback(Output('output-image-upload', 'children'),
               Input('upload-image', 'contents'),
