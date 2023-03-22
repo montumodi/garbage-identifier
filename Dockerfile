@@ -5,8 +5,9 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 
 RUN pip install -U pip
-RUN pip install --no-cache-dir gunicorn dash numpy~=1.17.5 tensorflow~=2.0.2 flask~=2.1.2 pillow~=7.2.0 protobuf~=3.20.0 boto3
+RUN pip install --no-cache-dir gunicorn dash numpy~=1.17.5 tensorflow~=2.0.2 flask~=2.1.2 pillow~=7.2.0 protobuf~=3.20.0
 RUN pip install --no-cache-dir mscviplib==2.200731.16
+RUN pip install pandas
 
 ENV PYTHONUNBUFFERED True
 
