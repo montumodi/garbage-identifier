@@ -20,10 +20,10 @@ app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
-    html.Video(id="videoElement",autoPlay=True,height=500,width=500),
+    html.Video(id="videoElement", autoPlay=True, height=500, width=500),
     dcc.Interval(id='interval_id', interval=1000),
     dcc.Store(id="my_store"),
-    html.Canvas(id="screenshot-canvas",hidden=True),
+    html.Canvas(id="screenshot-canvas", hidden=True),
     # dcc.Input(
     #         id="secretId",type="text",value=''
     #     ),
@@ -50,8 +50,10 @@ app.layout = html.Div([
     html.Div(id="container")
 ])
 
+
 def myFunc(e):
-  return e["probability"]
+    return e["probability"]
+
 
 def parse_contents(contents, y):
     myList = sorted(y["predictions"], key=myFunc, reverse=True)
@@ -63,6 +65,7 @@ def parse_contents(contents, y):
         # html.Hr(),
         dash_table.DataTable(myList)
     ])
+
 
 app.clientside_callback(
     """
@@ -81,11 +84,12 @@ app.clientside_callback(
     Input("interval_id", "n_intervals")
 )
 
+
 @app.callback(Output("output-image-upload", "children"),
               Input("my_store", "data"))
 def test_method(list_of_contents):
     if (list_of_contents is not None) and (str(list_of_contents) != 'data:,'):
-        base64Image = base64.b64decode(list_of_contents.split(",")[1]);
+        base64Image = base64.b64decode(list_of_contents.split(",")[1])
         img = Image.open(io.BytesIO(base64Image))
         Y = predict_image(img)
         children = parse_contents(list_of_contents, Y)
@@ -103,5 +107,6 @@ def test_method(list_of_contents):
 #         children = parse_contents(list_of_contents[0], list_of_names[0], list_of_dates[0], Y)
 #         return children
 
+
 if __name__ == '__main__':
-    app.run_server(debug=True,port=8080)
+    app.run_server(debug=True, port=8080)
