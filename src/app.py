@@ -21,9 +21,9 @@ server = app.server
 
 app.layout = html.Div([
     html.Video(id="videoElement",autoPlay=True,height=500,width=500),
-    dcc.Interval(id='interval_id', interval=3000),
+    dcc.Interval(id='interval_id', interval=1000),
     dcc.Store(id="my_store"),
-    # html.Canvas(id="screenshot-canvas"),
+    html.Canvas(id="screenshot-canvas",hidden=True),
     # dcc.Input(
     #         id="secretId",type="text",value=''
     #     ),
@@ -68,9 +68,9 @@ app.clientside_callback(
     """
     function(interval) {
         var video = document.querySelector("#videoElement");
-        var canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        var canvas = document.querySelector("#screenshot-canvas");
+        canvas.width = 300; // video.videoWidth;
+        canvas.height = 300; // video.videoHeight;
         var context = canvas.getContext("2d");
         context.drawImage(video, 0, 0);
         var dataURL = canvas.toDataURL();
