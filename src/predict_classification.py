@@ -7,8 +7,8 @@ import numpy as np
 
 import mscviplib
 
-filename = '../model/model.pb'
-labels_filename = '../model/labels.txt'
+filename = '../model/classification/model.pb'
+labels_filename = '../model/classification/labels.txt'
 
 network_input_size = 0
 
