@@ -81,6 +81,8 @@ def add_bbox(fig, x0, y0, x1, y1,
         showlegend=showlegend,
     ))
 
+def get_graph(id):
+    return dcc.Graph(id=id, config={'displayModeBar': False}, figure={"layout": go.Layout(xaxis={'showgrid': False, 'visible': False, 'zeroline': False},yaxis = {'showgrid': False, 'zeroline': False, 'visible': False,})}, style={"height": "70vh"})
 
 # colors for visualization
 COLORS = ['#fe938c', '#86e7b8', '#f9ebe0', '#208aae', '#fe4a49',
@@ -113,33 +115,26 @@ def get_upload_control(id):
              )], className="row")
 
 app.layout = html.Div(children=[
-    html.Div(children=[html.H1("It's not a trash")], className="row"),
+    html.Div(children=[html.H1("Sortify")], className="row"),
     dcc.Tabs([
         dcc.Tab(label='Recycle type detection', children=[
             get_upload_control("upload-image"),
             html.Div([
                 dcc.Loading(
                      id="loading-model-ouput-prediction",
-                     children=[
-                        (dcc.Graph(id='model-output',config={"showAxisRangeEntryBoxes": False, "displayModeBar": "False"}, style={"height": "70vh"}))],
-                     type="circle",
-                     )
-            ], className="seven columns"),
+                     children=[get_graph("model-output")])], className="seven columns"),
             html.Div([
                 dcc.Loading(
                     id="loading-model-ouput-graph",
-                    children=[html.Div(id="emissions-graph")],
-                    type="circle",
-                )
-            ], className="four columns")
-        ]),
+                    children=[html.Div(id="emissions-graph")], type="circle")], className="four columns")]
+        ),
         dcc.Tab(label='Plastic type detection', children=[
             get_upload_control("upload-image-plastic"),
             html.Div([
                 dcc.Loading(
                      id="loading-model-ouput-prediction-plastic",
                      children=[
-                        (dcc.Graph(id='model-output-plastic', style={"height": "70vh"}))],
+                        get_graph("model-output-plastic")],
                      type="circle",
                      )
             ], className="seven columns"),
