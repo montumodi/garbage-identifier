@@ -85,8 +85,57 @@ COLORS = ['#fe938c', '#86e7b8', '#f9ebe0', '#208aae', '#fe4a49',
 app = dash.Dash(__name__)
 server = app.server  # Expose the server variable for deployments
 
+# # Define the emissions savings per unit of material recycled
+# emissions_savings = {
+#     'Paper/Cardboard': 0.71,
+#     'Glass': 0.23,
+#     'Plastic': 1.13,
+#     'Battery': 2.34,
+#     'Organic': 0.46,
+#     'Clothes': 1.08,
+#     'E-Waste': 1.18,
+#     'Light Bulbs': 0.32,
+#     'Metal': 1.34
+# }
+
+# # Define the weight of each material recycled
+# material_weights = {
+#     'Paper/Cardboard': 2000,
+#     'Glass': 1000,
+#     'Plastic': 500,
+#     'Battery': 50,
+#     'Organic': 100,
+#     'Clothes': 150,
+#     'E-Waste': 75,
+#     'Light Bulbs': 25,
+#     'Metal': 250
+# }
+
+# # Create a dictionary of material weights in kg
+# average_material_weights = {
+#     'Paper/Cardboard': 0.005, # 0.5 kg per 100 sheets of standard copy paper
+#     'Glass': 0.8, # 0.8 kg per 1 liter bottle
+#     'Plastic': 0.05, # 0.05 kg per plastic bottle or container
+#     'Battery': 0.05, # 0.05 kg per AA battery
+#     'Organic': 0.1, # 0.1 kg per day of food waste (varies depending on moisture content)
+#     'Clothes': 0.5, # 0.5 kg per shirt or pair of pants
+#     'E-Waste': 3, # 3 kg per desktop computer or laptop
+#     'Light Bulbs': 0.1, # 0.1 kg per compact fluorescent bulb (CFL)
+#     'Metal': 0.2 # 0.2 kg per aluminum can or food tin
+# }
+
+# # Calculate the carbon emissions saved for each material
+# carbon_emissions = {k: v * emissions_savings[k] * material_weights[k] / 1000 for k, v in emissions_savings.items()}
+
+# # Create a bar chart of the carbon emissions saved
+# data = [go.Bar(x=list(carbon_emissions.keys()), y=list(carbon_emissions.values()))]
+# layout = go.Layout(title='Carbon Emissions Saved by Recycling',
+#                    xaxis={'title': 'Material'},
+#                    yaxis={'title': 'Carbon Emissions Saved (kg CO2e)'})
+
 app.layout = html.Div(className='container', children=[
-    Row(html.H1("Dash Object Detection App")),
+    Row(html.H1("It's not a trash")),
+    # Row(dcc.Graph(id='emissions-graph', figure={'data': data, 'layout': layout})),
     Row(dcc.Upload(
         id='upload-image',
         children=html.Div([
@@ -104,41 +153,45 @@ app.layout = html.Div(className='container', children=[
             'margin': '10px'
         },
         # Allow multiple files to be uploaded
-        multiple=True
+        multiple=False
     )),
     Row(dcc.Graph(id='model-output', style={"height": "70vh"}))
 ])
 
-
-def myFunc(e):
+def sortFunc(e):
     return e["probability"]
-
 
 @app.callback(
     Output('model-output', 'figure'),
     [Input('upload-image', 'contents')])
 def run_model(list_of_contents):
     if list_of_contents is not None:
-        im = base64.b64decode(list_of_contents[0].split(",")[1])
-        img = Image.open(io.BytesIO(im))
-        fig = pil_to_fig(img, showlegend=True, title='Predictions')
-        myList = predict_image(img)
-        myList = sorted(myList["predictions"], key=myFunc, reverse=True)
-        myList = list(filter(lambda item: item["probability"] >= 0.5, myList))
-        img_height, img_width = img.size
-        for bbox in myList:
-            x0 = bbox["boundingBox"]["left"] * img_width
-            y0 = bbox["boundingBox"]["top"] * img_width
-            x1 = (bbox["boundingBox"]["left"] +
-                  bbox["boundingBox"]["width"]) * img_height
-            y1 = (bbox["boundingBox"]["top"] +
-                  bbox["boundingBox"]["height"]) * img_height
-            text = bbox["tagName"]
-            label = bbox["tagName"]
+        base64Image = base64.b64decode(list_of_contents.split(",")[1])
+        img = Image.open(io.BytesIO(base64Image))
+        tstart = time.time()
+        predictions = predict_image(img)
+        tend = time.time()
+        fig = pil_to_fig(img, showlegend=True, title=f'Predictions took {tend-tstart:.2f}s')
+        predictions = sorted(predictions["predictions"], key=sortFunc, reverse=True)
+        predictions = list(filter(lambda item: item["probability"] >= 0.5, predictions))
+        img_width, img_height = img.size
+        for bbox in predictions:
+            left = bbox["boundingBox"]["left"]
+            width = bbox["boundingBox"]["width"]
+            height = bbox["boundingBox"]["height"]
+            top = bbox["boundingBox"]["top"]
 
+            x0 = left * img_width
+            y0 = top * img_height
+            x1 = (left + width) * img_width
+            y1 = (top + height) * img_height
+            label = bbox["tagName"]
+            confidence = bbox["probability"]
+            tagId = bbox["tagId"]
+            text = f"class={label}<br>confidence={confidence:.3f}"
             add_bbox(
                 fig, x0, y0, x1, y1,
-                opacity=0.7, group=label, name=label, color=COLORS[bbox["tagId"]],
+                opacity=0.7, group=label, name=label, color=COLORS[tagId],
                 showlegend=True, text=text
             )
 
