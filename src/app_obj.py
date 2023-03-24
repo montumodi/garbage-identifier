@@ -111,14 +111,14 @@ app.layout = html.Div(children=[
     )], className="row"),
     html.Div([
         dcc.Loading(
-                    id="loading-model-ouput",
+                    id="loading-model-ouput-prediction",
                     children=[(dcc.Graph(id='model-output', style={"height": "70vh"}))],
                     type="circle",
                 )
         ], className="seven columns"),
     html.Div([
         dcc.Loading(
-                    id="loading-model-ouput",
+                    id="loading-model-ouput-graph",
                     children=[html.Div(id="emissions-graph")],
                     type="circle",
                 )

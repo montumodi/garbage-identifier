@@ -14,4 +14,8 @@ gunicorn --bind :8080 --chdir src/ app:server --reload
 gunicorn --bind :8080 --chdir src/ app_obj:server --reload
 
 
+// How to push new images
+docker build -t montumodi/custom-vision .
+docker push montumodi/custom-vision:latest
+
 ```

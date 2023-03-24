@@ -12,7 +12,7 @@ emissions_savings = {
     'Organic': 0.46,
     'Clothes': 1.08,
     'e-Waste': 1.18,
-    'Light Bulbs': 0.32,
+    'Light Bulb': 0.32,
     'Metal': 1.34
 }
 
@@ -26,7 +26,7 @@ average_material_weights = {
     'Organic': 0.1, # 0.1 kg per day of food waste (varies depending on moisture content)
     'Clothes': 0.5, # 0.5 kg per shirt or pair of pants
     'e-Waste': 3, # 3 kg per desktop computer or laptop
-    'Light Bulbs': 0.1, # 0.1 kg per compact fluorescent bulb (CFL)
+    'Light Bulb': 0.1, # 0.1 kg per compact fluorescent bulb (CFL)
     'Metal': 0.2 # 0.2 kg per aluminum can or food tin
 }
 
@@ -41,7 +41,7 @@ def get_carbon_emission_graph(predictions):
         'Organic': 0,
         'Clothes': 0,
         'e-Waste': 0,
-        'Light Bulbs': 0,
+        'Light Bulb': 0,
         'Metal': 0
     }
 
