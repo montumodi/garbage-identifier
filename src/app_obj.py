@@ -12,6 +12,8 @@ from predict_object_detection import initialize, predict_image
 from PIL import Image
 from carbon_emission import get_carbon_emission_graph
 
+minimum_confidence_score = 0.5
+
 initialize()
 
 # plotly.py helper functions
@@ -107,8 +109,20 @@ app.layout = html.Div(children=[
         # Allow multiple files to be uploaded
         multiple=False
     )], className="row"),
-    html.Div(children=[(dcc.Graph(id='model-output', style={"height": "70vh"}))], className="seven columns"),
-    html.Div(id="emissions-graph",className="four columns"),
+    html.Div([
+        dcc.Loading(
+                    id="loading-model-ouput",
+                    children=[(dcc.Graph(id='model-output', style={"height": "70vh"}))],
+                    type="circle",
+                )
+        ], className="seven columns"),
+    html.Div([
+        dcc.Loading(
+                    id="loading-model-ouput",
+                    children=[html.Div(id="emissions-graph")],
+                    type="circle",
+                )
+        ],className="four columns"),
 ])
 
 def sortFunc(e):
@@ -127,7 +141,7 @@ def run_model(list_of_contents):
         tend = time.time()
         fig = pil_to_fig(img, showlegend=True, title=f'Predictions took {tend-tstart:.2f}s')
         predictions = sorted(predictions["predictions"], key=sortFunc, reverse=True)
-        predictions = list(filter(lambda item: item["probability"] >= 0.5, predictions))
+        predictions = list(filter(lambda item: item["probability"] >= minimum_confidence_score, predictions))
         img_width, img_height = img.size
         
         for bbox in predictions:
