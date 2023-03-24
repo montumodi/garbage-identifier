@@ -10,6 +10,7 @@ import dash_html_components as html
 import plotly.graph_objects as go
 from predict_object_detection import initialize, predict_image
 from PIL import Image
+from carbon_emission import get_carbon_emission_graph
 
 initialize()
 
@@ -26,7 +27,7 @@ def pil_to_b64(im, enc="png"):
 
 
 def Row(children=None, **kwargs):
-    return html.Div(children, className="row", **kwargs)
+    return html.Div(children, className="six columns", **kwargs)
 
 
 def pil_to_fig(im, showlegend=False, title=None):
@@ -85,58 +86,9 @@ COLORS = ['#fe938c', '#86e7b8', '#f9ebe0', '#208aae', '#fe4a49',
 app = dash.Dash(__name__)
 server = app.server  # Expose the server variable for deployments
 
-# # Define the emissions savings per unit of material recycled
-# emissions_savings = {
-#     'Paper/Cardboard': 0.71,
-#     'Glass': 0.23,
-#     'Plastic': 1.13,
-#     'Battery': 2.34,
-#     'Organic': 0.46,
-#     'Clothes': 1.08,
-#     'E-Waste': 1.18,
-#     'Light Bulbs': 0.32,
-#     'Metal': 1.34
-# }
-
-# # Define the weight of each material recycled
-# material_weights = {
-#     'Paper/Cardboard': 2000,
-#     'Glass': 1000,
-#     'Plastic': 500,
-#     'Battery': 50,
-#     'Organic': 100,
-#     'Clothes': 150,
-#     'E-Waste': 75,
-#     'Light Bulbs': 25,
-#     'Metal': 250
-# }
-
-# # Create a dictionary of material weights in kg
-# average_material_weights = {
-#     'Paper/Cardboard': 0.005, # 0.5 kg per 100 sheets of standard copy paper
-#     'Glass': 0.8, # 0.8 kg per 1 liter bottle
-#     'Plastic': 0.05, # 0.05 kg per plastic bottle or container
-#     'Battery': 0.05, # 0.05 kg per AA battery
-#     'Organic': 0.1, # 0.1 kg per day of food waste (varies depending on moisture content)
-#     'Clothes': 0.5, # 0.5 kg per shirt or pair of pants
-#     'E-Waste': 3, # 3 kg per desktop computer or laptop
-#     'Light Bulbs': 0.1, # 0.1 kg per compact fluorescent bulb (CFL)
-#     'Metal': 0.2 # 0.2 kg per aluminum can or food tin
-# }
-
-# # Calculate the carbon emissions saved for each material
-# carbon_emissions = {k: v * emissions_savings[k] * material_weights[k] / 1000 for k, v in emissions_savings.items()}
-
-# # Create a bar chart of the carbon emissions saved
-# data = [go.Bar(x=list(carbon_emissions.keys()), y=list(carbon_emissions.values()))]
-# layout = go.Layout(title='Carbon Emissions Saved by Recycling',
-#                    xaxis={'title': 'Material'},
-#                    yaxis={'title': 'Carbon Emissions Saved (kg CO2e)'})
-
-app.layout = html.Div(className='container', children=[
-    Row(html.H1("It's not a trash")),
-    # Row(dcc.Graph(id='emissions-graph', figure={'data': data, 'layout': layout})),
-    Row(dcc.Upload(
+app.layout = html.Div(children=[
+    html.Div(children=[html.H1("It's not a trash")], className= "row"),
+    html.Div(children=[dcc.Upload(
         id='upload-image',
         children=html.Div([
             'Drag and Drop or ',
@@ -154,15 +106,17 @@ app.layout = html.Div(className='container', children=[
         },
         # Allow multiple files to be uploaded
         multiple=False
-    )),
-    Row(dcc.Graph(id='model-output', style={"height": "70vh"}))
+    )], className="row"),
+    html.Div(children=[(dcc.Graph(id='model-output', style={"height": "70vh"}))], className="seven columns"),
+    html.Div(id="emissions-graph",className="four columns"),
 ])
 
 def sortFunc(e):
     return e["probability"]
 
 @app.callback(
-    Output('model-output', 'figure'),
+    [Output('model-output', 'figure'),
+     Output('emissions-graph', 'children')],
     [Input('upload-image', 'contents')])
 def run_model(list_of_contents):
     if list_of_contents is not None:
@@ -175,6 +129,7 @@ def run_model(list_of_contents):
         predictions = sorted(predictions["predictions"], key=sortFunc, reverse=True)
         predictions = list(filter(lambda item: item["probability"] >= 0.5, predictions))
         img_width, img_height = img.size
+        
         for bbox in predictions:
             left = bbox["boundingBox"]["left"]
             width = bbox["boundingBox"]["width"]
@@ -192,10 +147,10 @@ def run_model(list_of_contents):
             add_bbox(
                 fig, x0, y0, x1, y1,
                 opacity=0.7, group=label, name=label, color=COLORS[tagId],
-                showlegend=True, text=text
+                showlegend=False, text=text
             )
-
-        return fig
+        
+        return [fig, get_carbon_emission_graph(predictions)]
     raise dash.exceptions.PreventUpdate
 
 
