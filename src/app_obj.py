@@ -4,18 +4,20 @@ import time
 import io
 
 import dash
+from dash import dash_table
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
 from predict_object_detection import initialize, predict_image
+from predict_classification import initialize as initialize_classification, predict_image as predict_image_classification
 from PIL import Image
 from carbon_emission import get_carbon_emission_graph
 
 minimum_confidence_score = 0.5
 
 initialize()
-
+initialize_classification()
 # plotly.py helper functions
 
 
@@ -88,45 +90,71 @@ COLORS = ['#fe938c', '#86e7b8', '#f9ebe0', '#208aae', '#fe4a49',
 app = dash.Dash(__name__)
 server = app.server  # Expose the server variable for deployments
 
+def get_upload_control(id):
+    return html.Div(children=[dcc.Upload(
+             id=id,
+             children=html.Div([
+                'Drag and Drop or ',
+                html.A('Select Files')
+             ]),
+             style={
+                 'width': '100%',
+                 'height': '60px',
+                 'lineHeight': '60px',
+                 'borderWidth': '1px',
+                 'borderStyle': 'dashed',
+                 'borderRadius': '5px',
+                 'textAlign': 'center',
+                 'margin': '10px'
+             },
+             # Allow multiple files to be uploaded
+             multiple=False
+             )], className="row")
+
 app.layout = html.Div(children=[
-    html.Div(children=[html.H1("It's not a trash")], className= "row"),
-    html.Div(children=[dcc.Upload(
-        id='upload-image',
-        children=html.Div([
-            'Drag and Drop or ',
-            html.A('Select Files')
-        ]),
-        style={
-            'width': '100%',
-            'height': '60px',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px'
-        },
-        # Allow multiple files to be uploaded
-        multiple=False
-    )], className="row"),
-    html.Div([
-        dcc.Loading(
-                    id="loading-model-ouput-prediction",
-                    children=[(dcc.Graph(id='model-output', style={"height": "70vh"}))],
-                    type="circle",
-                )
-        ], className="seven columns"),
-    html.Div([
-        dcc.Loading(
+    html.Div(children=[html.H1("It's not a trash")], className="row"),
+    dcc.Tabs([
+        dcc.Tab(label='Recycle type detection', children=[
+            get_upload_control("upload-image"),
+            html.Div([
+                dcc.Loading(
+                     id="loading-model-ouput-prediction",
+                     children=[
+                        (dcc.Graph(id='model-output',config={"showAxisRangeEntryBoxes": False, "displayModeBar": "False"}, style={"height": "70vh"}))],
+                     type="circle",
+                     )
+            ], className="seven columns"),
+            html.Div([
+                dcc.Loading(
                     id="loading-model-ouput-graph",
                     children=[html.Div(id="emissions-graph")],
                     type="circle",
                 )
-        ],className="four columns"),
+            ], className="four columns")
+        ]),
+        dcc.Tab(label='Plastic type detection', children=[
+            get_upload_control("upload-image-plastic"),
+            html.Div([
+                dcc.Loading(
+                     id="loading-model-ouput-prediction-plastic",
+                     children=[
+                        (dcc.Graph(id='model-output-plastic', style={"height": "70vh"}))],
+                     type="circle",
+                     )
+            ], className="seven columns"),
+            html.Div(id="data-table-plastic", className="four columns")
+        ])
+    ])
 ])
 
-def sortFunc(e):
+
+def sort_func(e):
     return e["probability"]
+
+def get_image(list_of_contents):
+    base64Image = base64.b64decode(list_of_contents.split(",")[1])
+    img = Image.open(io.BytesIO(base64Image))
+    return img
 
 @app.callback(
     [Output('model-output', 'figure'),
@@ -134,16 +162,23 @@ def sortFunc(e):
     [Input('upload-image', 'contents')])
 def run_model(list_of_contents):
     if list_of_contents is not None:
-        base64Image = base64.b64decode(list_of_contents.split(",")[1])
-        img = Image.open(io.BytesIO(base64Image))
+        # Get Image
+        img = get_image(list_of_contents)
+
+        # Predict
         tstart = time.time()
         predictions = predict_image(img)
         tend = time.time()
-        fig = pil_to_fig(img, showlegend=True, title=f'Predictions took {tend-tstart:.2f}s')
-        predictions = sorted(predictions["predictions"], key=sortFunc, reverse=True)
-        predictions = list(filter(lambda item: item["probability"] >= minimum_confidence_score, predictions))
+
+        # Plot
+        fig = pil_to_fig(img, showlegend=True,
+                         title=f'Predictions took {tend-tstart:.2f}s')
+        predictions = sorted(
+            predictions["predictions"], key=sort_func, reverse=True)
+        predictions = list(filter(
+            lambda item: item["probability"] >= minimum_confidence_score, predictions))
         img_width, img_height = img.size
-        
+
         for bbox in predictions:
             left = bbox["boundingBox"]["left"]
             width = bbox["boundingBox"]["width"]
@@ -163,10 +198,32 @@ def run_model(list_of_contents):
                 opacity=0.7, group=label, name=label, color=COLORS[tagId],
                 showlegend=False, text=text
             )
-        
+
         return [fig, get_carbon_emission_graph(predictions)]
     raise dash.exceptions.PreventUpdate
 
+@app.callback(
+    [Output('model-output-plastic', 'figure'),
+     Output('data-table-plastic', 'children')],
+    [Input('upload-image-plastic', 'contents')])
+def run_model_plastic(list_of_contents):
+    if list_of_contents is not None:
+        # Get Image
+        img = get_image(list_of_contents)
+
+        # Predict
+        tstart = time.time()
+        predictions = predict_image_classification(img)
+        tend = time.time()
+
+        # Plot
+        fig = pil_to_fig(img, showlegend=True,
+                         title=f'Predictions took {tend-tstart:.2f}s')
+        predictions = sorted(
+            predictions["predictions"], key=sort_func, reverse=True)
+        print(predictions[0])
+        return [fig, html.Div([html.H3(f"This looks like a {predictions[0]['tagName']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%")])]
+    raise dash.exceptions.PreventUpdate
 
 server = app.server
 
