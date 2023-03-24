@@ -171,7 +171,7 @@ app.clientside_callback(
     """
         function(n_clicks) {
         if (n_clicks) {
-            navigator.mediaDevices.getUserMedia({'video': true})
+            navigator.mediaDevices.getUserMedia({'video': {facingMode: 'environment'}})
             .then(function(stream) {
                 document.getElementById('videoElement').srcObject = stream;
             })
