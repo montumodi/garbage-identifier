@@ -13,12 +13,13 @@ from predict_object_detection import initialize, predict_image
 from predict_classification import initialize as initialize_classification, predict_image as predict_image_classification
 from PIL import Image
 from carbon_emission import get_carbon_emission_graph
-
+from plastic_type import mapping
 minimum_confidence_score = 0.5
 
 initialize()
 initialize_classification()
 # plotly.py helper functions
+bools = ('No','Yes')
 
 
 def pil_to_b64(im, enc="png"):
@@ -221,8 +222,16 @@ def run_model_plastic(list_of_contents):
                          title=f'Predictions took {tend-tstart:.2f}s')
         predictions = sorted(
             predictions["predictions"], key=sort_func, reverse=True)
-        print(predictions[0])
-        return [fig, html.Div([html.H3(f"This looks like a {predictions[0]['tagName']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%")])]
+        predicted_tag = predictions[0]['tagName']
+        element = [x for x in mapping if x["label"] == predicted_tag][0]
+        return [fig, html.Div([
+            html.H3(f"This looks like {element['full text']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%"),
+            html.H6(f'Can it be recycled?: {bools[element["is_recyclable"]]}'),
+            html.H6(f'How can it be recycled?: {element["how_to_recyle"]}'),
+            html.H6(f'Some examples: {", ".join(element["examples"])}'),
+            html.H6(f'This can be recycled into: {", ".join(element["recycle_into"])}'),
+            html.H6(f'This can be recycled at: {", ".join(element["places_it_can_be_recycled"])}'),
+            ])]
     raise dash.exceptions.PreventUpdate
 
 server = app.server
