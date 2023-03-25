@@ -9,15 +9,19 @@ from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
-from predict_object_detection import initialize, predict_image
-from predict_classification import initialize as initialize_classification, predict_image as predict_image_classification
+from predict_recycle_type_object_detection import initialize, predict_image
+from predict_plastic_type_classification import initialize as initialize_plastic_classification, predict_image as predict_plastic_type_classification
+from predict_recycle_type_classification import initialize as initialize_recycle_classification, predict_image as predict_recycle_classification
+
 from PIL import Image
 from carbon_emission import get_carbon_emission_graph
 from plastic_type import mapping
+from recycle_type import mapping as mapping_recycle
 minimum_confidence_score = 0.10
 
 initialize()
-initialize_classification()
+initialize_plastic_classification()
+initialize_recycle_classification()
 # plotly.py helper functions
 bools = ('No','Yes')
 
@@ -117,7 +121,7 @@ def get_upload_control(id):
 app.layout = html.Div(children=[
     html.Div(children=[html.H1("Sortify")], className="row"),
     dcc.Tabs([
-        dcc.Tab(label='Recycle type detection', id="recycle_tab", children=[
+        dcc.Tab(label='Recycle type detection (Multi)', id="recycle_tab", children=[
             get_upload_control("upload-image"),
             html.Div([
                 dcc.Loading(
@@ -126,8 +130,16 @@ app.layout = html.Div(children=[
             html.Div([
                 dcc.Loading(
                     id="loading-model-ouput-graph",
-                    children=[html.Div(id="emissions-graph")], type="circle")], className="four columns")]
-        ),
+                    children=[html.Div(id="emissions-graph")], type="circle")], className="four columns")
+        ]),
+        dcc.Tab(label='Recycle type detection (Single)', children=[
+            html.Button('Open Camera', id='camera-btn',className="row"),
+            html.Video(id='videoElement', autoPlay=True, className="seven columns", height=500, width=500),
+            html.Div(id="data-table-recycle", className="four columns"),
+            dcc.Interval(id='interval_id', interval=1000, n_intervals=0),
+            dcc.Store(id="my_store",data=[]),
+            html.Canvas(id="screenshot-canvas", hidden=True)
+        ]),
         dcc.Tab(label='Plastic type detection', id="plastic_tab", children=[
             get_upload_control("upload-image-plastic"),
             html.Div([
@@ -150,6 +162,74 @@ def get_image(list_of_contents):
     base64Image = base64.b64decode(list_of_contents.split(",")[1])
     img = Image.open(io.BytesIO(base64Image))
     return img
+
+@app.callback(Output("data-table-recycle", "children"),
+              [Input("my_store", "data"), Input('camera-btn', 'n_clicks')])
+def run_model_recycle_single(list_of_contents, n_clicks):
+    if (list_of_contents is not None) and (str(list_of_contents) != 'data:,' and len(list_of_contents) > 3500) and (n_clicks is not None):
+        # Get Image
+        img = get_image(list_of_contents)
+
+        # Predict
+        tstart = time.time()
+        predictions = predict_recycle_classification(img)
+        tend = time.time()
+
+        predictions = sorted(
+            predictions["predictions"], key=sort_func, reverse=True)
+        predicted_tag = predictions[0]['tagName']
+        print(predicted_tag)
+        element = [x for x in mapping_recycle if x["label"] == predicted_tag][0]
+        
+        return html.Div([
+            html.H3(f"This looks like {element['full text']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%"),
+            html.H6(f'Can it be recycled?: {bools[element["is_recyclable"]]}'),
+            html.H6(f'How can it be recycled?: {element["how_to_recyle"]}'),
+            html.H6(f'Some examples: {", ".join(element["examples"])}'),
+            html.H6(f'This can be recycled into: {", ".join(element["recycle_into"])}'),
+            html.H6(f'This can be recycled at: {", ".join(element["places_it_can_be_recycled"])}'),
+            ])
+    return html.Div()
+
+app.clientside_callback(
+    """
+    function(interval) {
+        var video = document.querySelector("#videoElement");
+        var canvas = document.querySelector("#screenshot-canvas");
+        if(canvas)
+            {
+                canvas.width = 300; // video.videoWidth;
+                canvas.height = 300; // video.videoHeight;
+                var context = canvas.getContext("2d");
+                context.drawImage(video, 0, 0);
+                var dataURL = canvas.toDataURL();
+                return dataURL;
+            }
+        return null;
+    }
+    """,
+    Output("my_store", "data"),
+    Input("interval_id", "n_intervals")
+
+)
+
+app.clientside_callback(
+    """
+        function(n_clicks) {
+        if (n_clicks) {
+            navigator.mediaDevices.getUserMedia({'video': {facingMode: 'environment'}})
+            .then(function(stream) {
+                document.getElementById('videoElement').srcObject = stream;
+            })
+            .catch(function(error) {
+                console.error('Failed to open camera: ' + error.message);
+            });
+        }
+    }
+    """,
+    Output('videoElement', 'src'),
+    Input('camera-btn', 'n_clicks')
+)
 
 @app.callback(
     [Output('model-output', 'figure'),
@@ -208,7 +288,7 @@ def run_model_plastic(list_of_contents):
 
         # Predict
         tstart = time.time()
-        predictions = predict_image_classification(img)
+        predictions = predict_plastic_type_classification(img)
         tend = time.time()
 
         # Plot

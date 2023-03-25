@@ -11,7 +11,7 @@ import base64
 
 
 from PIL import Image
-from predict_classification import initialize, predict_image
+from predict_plastic_type_classification import initialize, predict_image
 
 initialize()
 
