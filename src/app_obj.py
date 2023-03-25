@@ -14,7 +14,7 @@ from predict_classification import initialize as initialize_classification, pred
 from PIL import Image
 from carbon_emission import get_carbon_emission_graph
 from plastic_type import mapping
-minimum_confidence_score = 0.5
+minimum_confidence_score = 0.10
 
 initialize()
 initialize_classification()
@@ -129,56 +129,19 @@ app.layout = html.Div(children=[
                     children=[html.Div(id="emissions-graph")], type="circle")], className="four columns")]
         ),
         dcc.Tab(label='Plastic type detection', id="plastic_tab", children=[
-            html.Button('Open Camera', id='camera-btn',className="row"),
-            html.Video(id='videoElement', autoPlay=True, className="seven columns", height=500, width=500),
-            html.Div(id="data-table-plastic", className="four columns"),
-            dcc.Interval(id='interval_id', interval=1000, n_intervals=0),
-            dcc.Store(id="my_store",data=[]),
-            html.Canvas(id="screenshot-canvas", hidden=True)
+            get_upload_control("upload-image-plastic"),
+            html.Div([
+                dcc.Loading(
+                     id="loading-model-ouput-prediction-plastic",
+                     children=[
+                        get_graph("model-output-plastic")],
+                     type="circle",
+                     )
+            ], className="seven columns"),
+            html.Div(id="data-table-plastic", className="four columns")
         ])
     ])
 ])
-
-
-app.clientside_callback(
-    """
-    function(interval) {
-        var video = document.querySelector("#videoElement");
-        var canvas = document.querySelector("#screenshot-canvas");
-        if(canvas)
-            {
-                canvas.width = 300; // video.videoWidth;
-                canvas.height = 300; // video.videoHeight;
-                var context = canvas.getContext("2d");
-                context.drawImage(video, 0, 0);
-                var dataURL = canvas.toDataURL();
-                return dataURL;
-            }
-        return null;
-    }
-    """,
-    Output("my_store", "data"),
-    Input("interval_id", "n_intervals")
-
-)
-
-app.clientside_callback(
-    """
-        function(n_clicks) {
-        if (n_clicks) {
-            navigator.mediaDevices.getUserMedia({'video': {facingMode: 'environment'}})
-            .then(function(stream) {
-                document.getElementById('videoElement').srcObject = stream;
-            })
-            .catch(function(error) {
-                console.error('Failed to open camera: ' + error.message);
-            });
-        }
-    }
-    """,
-    Output('videoElement', 'src'),
-    Input('camera-btn', 'n_clicks')
-)
 
 def sort_func(e):
     return e["probability"]
@@ -234,10 +197,12 @@ def run_model(list_of_contents):
         return [fig, get_carbon_emission_graph(predictions)]
     raise dash.exceptions.PreventUpdate
 
-@app.callback(Output("data-table-plastic", "children"),
-              [Input("my_store", "data"), Input('camera-btn', 'n_clicks')])
-def run_model_plastic(list_of_contents, n_clicks):
-    if (list_of_contents is not None) and (str(list_of_contents) != 'data:,' and len(list_of_contents) > 3500) and (n_clicks is not None):
+@app.callback(
+    [Output('model-output-plastic', 'figure'),
+     Output('data-table-plastic', 'children')],
+    [Input('upload-image-plastic', 'contents')])
+def run_model_plastic(list_of_contents):
+    if list_of_contents is not None:
         # Get Image
         img = get_image(list_of_contents)
 
@@ -246,20 +211,22 @@ def run_model_plastic(list_of_contents, n_clicks):
         predictions = predict_image_classification(img)
         tend = time.time()
 
+        # Plot
+        fig = pil_to_fig(img, showlegend=True,
+                         title=f'Predictions took {tend-tstart:.2f}s')
         predictions = sorted(
             predictions["predictions"], key=sort_func, reverse=True)
         predicted_tag = predictions[0]['tagName']
         element = [x for x in mapping if x["label"] == predicted_tag][0]
-        
-        return html.Div([
+        return [fig, html.Div([
             html.H3(f"This looks like {element['full text']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%"),
             html.H6(f'Can it be recycled?: {bools[element["is_recyclable"]]}'),
             html.H6(f'How can it be recycled?: {element["how_to_recyle"]}'),
             html.H6(f'Some examples: {", ".join(element["examples"])}'),
             html.H6(f'This can be recycled into: {", ".join(element["recycle_into"])}'),
             html.H6(f'This can be recycled at: {", ".join(element["places_it_can_be_recycled"])}'),
-            ])
-    return html.Div()
+            ])]
+    raise dash.exceptions.PreventUpdate
 
 server = app.server
 
