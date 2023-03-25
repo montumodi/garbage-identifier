@@ -117,7 +117,7 @@ def get_upload_control(id):
 app.layout = html.Div(children=[
     html.Div(children=[html.H1("Sortify")], className="row"),
     dcc.Tabs([
-        dcc.Tab(label='Recycle type detection', children=[
+        dcc.Tab(label='Recycle type detection', id="recycle_tab", children=[
             get_upload_control("upload-image"),
             html.Div([
                 dcc.Loading(
@@ -130,26 +130,21 @@ app.layout = html.Div(children=[
         ),
         dcc.Tab(label='Plastic type detection', id="plastic_tab", children=[
             html.Button('Open Camera', id='camera-btn',className="row"),
-            html.Video(id='videoElement', autoPlay=True, className="seven columns"),
+            html.Video(id='videoElement', autoPlay=True, className="seven columns", height=500, width=500),
             html.Div(id="data-table-plastic", className="four columns"),
-            dcc.Interval(id='interval_id', interval=1000),
+            dcc.Interval(id='interval_id', interval=1000, n_intervals=0),
             dcc.Store(id="my_store",data=[]),
             html.Canvas(id="screenshot-canvas", hidden=True)
         ])
     ])
 ])
 
-@app.callback(Output('camera-btn', 'n_clicks'),
-            Input('plastic_tab', 'n_clicks'))
-def clear_click(click):
-    return None
 
 app.clientside_callback(
     """
     function(interval) {
         var video = document.querySelector("#videoElement");
         var canvas = document.querySelector("#screenshot-canvas");
-        console.log(canvas);
         if(canvas)
             {
                 canvas.width = 300; // video.videoWidth;
@@ -242,8 +237,7 @@ def run_model(list_of_contents):
 @app.callback(Output("data-table-plastic", "children"),
               [Input("my_store", "data"), Input('camera-btn', 'n_clicks')])
 def run_model_plastic(list_of_contents, n_clicks):
-    print(n_clicks)
-    if (list_of_contents is not None) and (str(list_of_contents) != 'data:,') and (n_clicks is not None):
+    if (list_of_contents is not None) and (str(list_of_contents) != 'data:,' and len(list_of_contents) > 3500) and (n_clicks is not None):
         # Get Image
         img = get_image(list_of_contents)
 
@@ -256,6 +250,7 @@ def run_model_plastic(list_of_contents, n_clicks):
             predictions["predictions"], key=sort_func, reverse=True)
         predicted_tag = predictions[0]['tagName']
         element = [x for x in mapping if x["label"] == predicted_tag][0]
+        
         return html.Div([
             html.H3(f"This looks like {element['full text']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%"),
             html.H6(f'Can it be recycled?: {bools[element["is_recyclable"]]}'),
@@ -264,7 +259,7 @@ def run_model_plastic(list_of_contents, n_clicks):
             html.H6(f'This can be recycled into: {", ".join(element["recycle_into"])}'),
             html.H6(f'This can be recycled at: {", ".join(element["places_it_can_be_recycled"])}'),
             ])
-    raise dash.exceptions.PreventUpdate
+    return html.Div()
 
 server = app.server
 

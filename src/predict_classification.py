@@ -132,7 +132,7 @@ def predict_image(image):
                 'predictions': result
             }
 
-            log_msg("Results: " + str(response))
+            # log_msg("Results: " + str(response))
             return response
 
     except Exception as e:
