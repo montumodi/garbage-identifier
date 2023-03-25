@@ -185,8 +185,6 @@ def run_model_recycle_single(list_of_contents, n_clicks):
             html.H3(f"This looks like {element['full text']}. Confidence:{int(float(predictions[0]['probability']) * 100)}%"),
             html.H6(f'Can it be recycled?: {bools[element["is_recyclable"]]}'),
             html.H6(f'How can it be recycled?: {element["how_to_recyle"]}'),
-            html.H6(f'Some examples: {", ".join(element["examples"])}'),
-            html.H6(f'This can be recycled into: {", ".join(element["recycle_into"])}'),
             html.H6(f'This can be recycled at: {", ".join(element["places_it_can_be_recycled"])}'),
             ])
     return html.Div()

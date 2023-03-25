@@ -1,113 +1,83 @@
 mapping = [
     {
         "label": "Batteries",
-        "full text": "Polyethylene (PET)",
+        "full text": "Batteries",
         "is_recyclable": True,
-        "examples": ["Single use bottles"],
-        "how_to_recyle": "Empty and rinse the container and recycle from home",
-        "recycle_into": [
-            "Tote bags",
-            "Funituire",
-            "Carpets",
-            "New bottles"
-        ],
+        "how_to_recyle": "These can't be recycled at home. Take them to nearest store. Most of them do that",
         "places_it_can_be_recycled": [
-            "home",
+            "recycling centres",
             "super market"
         ]
     },
     {
         "label": "Cardboard",
-        "full text": "High density Polyethylene (HDPE)",
+        "full text": "Cardboard",
         "is_recyclable": True,
-        "how_to_recyle": "Empty and rinse the container and recycle from home",
-        "examples": ["Milk & juice bottles", "Shampoo bottles"],
-        "recycle_into": [
-            "Pens",
-            "Fencing",
-            "benches",
-            "Picnic tables"
-        ],
+        "how_to_recyle": "These can be recylced at home. Place it in recycling bin.",
         "places_it_can_be_recycled": [
             "home",
-            "super market"
+            "recycling centres"
         ]
     },
     {
         "label": "Cloths",
-        "full text": "Polyvinylchloride (PVC)",
+        "full text": "Cloths",
         "is_recyclable": True,
-        "how_to_recyle": "PVC can rarely be recycled and definitely can’t be recycled from home.",
+        "how_to_recyle": "These can't be recycled at home. Take them to super market or recycling centres.",
         "examples": ["Drain pipes", "Windows"],
-        "recycle_into": [
-            "Flooring",
-            "Mats"
-        ],
         "places_it_can_be_recycled": [
-            "Recycling centre"
+            "Recycling centre",
+            "Some apparel stores"
         ]
     },
     {
         "label": "e-waste",
-        "full text": "Low density polyethylene (LDPE)",
-        "is_recyclable": False,
-        "how_to_recyle": "Most councils don’t collect this plastic for recycling, so you’ll need to throw it in the bin",
+        "full text": "Electronic waste",
+        "is_recyclable": True,
+        "how_to_recyle": "These can't be recycled at home. Take them to recycling centres or dedicted e-waste bins.",
         "examples": ["Toothpaste tubes", "Frozen food bags"],
-        "recycle_into": ["NA"],
-        "places_it_can_be_recycled": ["NA"]
+        "places_it_can_be_recycled": ["Recycling cenres", "Dedciated e-waste bins"]
     },
     {
         "label": "Glass",
-        "full text": "Polypropylene (PP)",
+        "full text": "Glass",
         "is_recyclable": True,
         "how_to_recyle": "It can be collected by lots of councils for recycling",
-        "examples": ["Some yogurt pots", "Syrup and medicine bottles"],
-        "recycle_into": ["New pots, tubs and trays"],
-        "places_it_can_be_recycled": ["Recycling centre"]
+        "places_it_can_be_recycled": ["Home", "Recycling centre"]
     },
     {
         "label": "Light bulbs",
-        "full text": "Polystyrene (PS)",
-        "is_recyclable": False,
-        "how_to_recyle": "It can not be recycled",
-        "examples": ["Disposable plates and cups", "Take-away containers"],
-        "recycle_into": ["NA"],
-        "places_it_can_be_recycled": ["NA"]
+        "full text": "Light bulbs",
+        "is_recyclable": True,
+        "how_to_recyle": "It can be collected by lots of councils for recycling",
+        "places_it_can_be_recycled": ["Home", "Recycling centre"]
     },
     {
         "label": "Metal",
-        "full text": "Other resins",
+        "full text": "Metal",
         "is_recyclable": True,
-        "how_to_recyle": "It can not be recycled",
-        "examples": ["Sunglasses", "Nylon"],
-        "recycle_into": ["NA"],
-        "places_it_can_be_recycled": ["NA"]
+        "how_to_recyle": "It can be collected by lots of councils for recycling",
+        "places_it_can_be_recycled": ["Home", "Recycling centre"]
     },
     {
         "label": "Organic",
-        "full text": "Nothing. Please use other tab to figure out what it is.",
-        "is_recyclable": False,
-        "how_to_recyle": "It can not be recycled",
-        "examples": ["NA"],
-        "recycle_into": ["NA"],
-        "places_it_can_be_recycled": ["NA"]
+        "full text": "Food waste",
+        "is_recyclable": True,
+        "how_to_recyle": "It can be recycled at home by putting in food waste bin or compost bin",
+        "places_it_can_be_recycled": ["Home"]
     },
     {
         "label": "Plastic",
-        "full text": "Nothing. Please use other tab to figure out what it is.",
-        "is_recyclable": False,
-        "how_to_recyle": "It can not be recycled",
-        "examples": ["NA"],
-        "recycle_into": ["NA"],
-        "places_it_can_be_recycled": ["NA"]
+        "full text": "Plastic",
+        "is_recyclable": True,
+        "how_to_recyle": "Some of the plastic can be recycled at home. Refer to Plastic recycle tab for more info.",
+        "places_it_can_be_recycled": ["Home", "Recycling centres"]
     },
     {
         "label": "Paper",
-        "full text": "Nothing. Please use other tab to figure out what it is.",
-        "is_recyclable": False,
-        "how_to_recyle": "It can not be recycled",
-        "examples": ["NA"],
-        "recycle_into": ["NA"],
-        "places_it_can_be_recycled": ["NA"]
+        "full text": "Paper",
+        "is_recyclable": True,
+        "how_to_recyle": "It can be collected by lots of councils for recycling",
+        "places_it_can_be_recycled": ["Home", "Recycling centres"]
     }
 ]
