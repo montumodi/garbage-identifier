@@ -17,6 +17,11 @@ The source code has been divided on to mainly two parts
         - predict_recycle_type_object_detection.py - Object classification prediction
     - Dockerfile
 
+# Training dataset
+
+- https://www.kaggle.com/datasets/piaoya/plastic-recycling-codes
+- https://www.kaggle.com/datasets/naidusurajvardhan/recycling-waste
+
 ## Prerequisites 
 
 Make sure docker is installed. More info [here](https://docs.docker.com/engine/install/) 
@@ -32,7 +37,11 @@ docker run -it -p 8080:8080 -e PORT=8080 sortify
 
 After this app should be availabe on http://localhost:8080
 
-If it doesn't work in one go, please refresh.
+## Notes
+
+- If app doesn't work in one go or keep showing loading symbol, please refresh.
+- Live camera feature for detecting recycle type may be buggy at times. Please refresh and try again.
+
 
 ## How to build, modify code and run locally
 
@@ -55,3 +64,7 @@ docker build -t docker-account-name/sortify .
 docker push docker-account-name/sortify:latest
 
 ```
+
+## Deployment on Azure Container Apps
+
+This app can be very easiluy deployed on azure container app service by providing docker image name, port mapping.
