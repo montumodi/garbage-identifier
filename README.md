@@ -5,6 +5,7 @@ recyclable materials. It also show different types of plastics like PET 1, PET 2
 This is created using [plotly dash](https://github.com/plotly/dash) for front end and Azure's [custom vision](https://www.customvision.ai/) service to tag and train models and [tensorflow python](https://www.tensorflow.org/learn) to predict.
 
 The source code has been divided on to mainly two parts
+
     - models
         - plastic_type_classification - Image classification model
         - recycle_type_classification - Image classification model
