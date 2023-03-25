@@ -17,6 +17,10 @@ The source code has been divided on to mainly two parts
         - predict_recycle_type_object_detection.py - Object classification prediction
     - Dockerfile
 
+## High level architecture
+
+![alt text](Sortify.jpg "Title")
+
 # Training dataset
 
 - https://www.kaggle.com/datasets/piaoya/plastic-recycling-codes
